@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Lock, Edit, Save, Eye, Share2, ArrowLeft, Check, X, History as HistoryIcon, Globe, Copy } from 'lucide-react';
+import { Edit, Save, Eye, Share2, ArrowLeft, Check, X, History as HistoryIcon, Globe, Copy, CheckCircle2 } from 'lucide-react';
 import { useProposal } from '../contexts/ProposalContext';
 import { useAuth } from '../hooks/useAuth';
-import ShareProposalModal from './ShareProposalModal';
 import EditableField from './EditableField';
 import { supabase } from '../lib/supabaseClient';
 import { format } from 'date-fns';
 import { recalculateServiceTotals } from '../utils/proposalGenerator';
 import { getProposalUrl } from '../utils/url';
+import { Button } from './Button';
+
+const formatCurrency = (value: number): string => {
+  return value.toFixed(2);
+};
 
 const ProposalViewer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +22,6 @@ const ProposalViewer: React.FC = () => {
   const { user } = useAuth();
   const isSharedView = location.search.includes('shared=true');
   
-  const [showShareModal, setShowShareModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState<any>(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -34,10 +37,15 @@ const ProposalViewer: React.FC = () => {
 
   const formatDate = (dateString: string): string => {
     try {
+      console.log('Formatting date:', dateString);
       if (!dateString) return 'No Date';
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      return format(date, 'yyyy-MM-dd');
+      console.log('Parsed date:', date);
+      if (isNaN(date.getTime())) {
+        console.error('Invalid date detected:', dateString);
+        return 'Invalid Date';
+      }
+      return format(date, 'MMMM d, yyyy');
     } catch (err) {
       console.error('Error formatting date:', err);
       return 'Invalid Date';
@@ -63,7 +71,10 @@ const ProposalViewer: React.FC = () => {
         throw new Error('Proposal not found');
       }
       
+      console.log('Raw proposal data:', proposal);
       const calculatedData = recalculateServiceTotals(proposal.data);
+      console.log('Calculated data:', calculatedData);
+      
       setEditedData({ ...calculatedData, customization: proposal.customization });
       setDisplayData({ ...calculatedData, customization: proposal.customization });
       setNotes(proposal.notes || '');
@@ -118,7 +129,6 @@ const ProposalViewer: React.FC = () => {
     }
     
     target[path[path.length - 1]] = value;
-
     const recalculatedData = recalculateServiceTotals(updatedData);
     setEditedData({ ...recalculatedData, customization: currentProposal?.customization });
     setDisplayData({ ...recalculatedData, customization: currentProposal?.customization });
@@ -350,11 +360,11 @@ const ProposalViewer: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500">Total Appointments</p>
-                    <p className="text-lg">{displayData.summary?.totalAppointments || 0}</p>
+                    <p className="text-lg">{displayData.summary?.totalAppointments}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Total Cost</p>
-                    <p className="text-lg">${(displayData.summary?.totalEventCost || 0).toFixed(2)}</p>
+                    <p className="text-lg">${formatCurrency(displayData.summary?.totalEventCost || 0)}</p>
                   </div>
                 </div>
               </div>
@@ -371,11 +381,15 @@ const ProposalViewer: React.FC = () => {
           )}
 
           {Object.entries(displayData.services || {}).map(([location, locationData]: [string, any]) => (
-            <div key={location} className="bg-white rounded-lg shadow-md p-8 mb-8">
-              <h2 className="text-2xl font-semibold mb-6">{location}</h2>
+            <div key={location} className="mb-8">
+              <h2 className="text-2xl font-semibold mb-6 bg-white rounded-lg shadow-md p-6">
+                {location}
+              </h2>
               
-              {Object.entries(locationData).map(([date, dateData]: [string, any], dateIndex: number) => (
-                <div key={date} className="mb-8">
+              {Object.entries(locationData)
+                .sort(([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime())
+                .map(([date, dateData]: [string, any], dateIndex: number) => (
+                <div key={date} className="bg-white rounded-lg shadow-md p-6 mb-6">
                   <h3 className="text-xl font-semibold mb-4">
                     Day {dateIndex + 1} - {formatDate(date)}
                   </h3>
@@ -439,14 +453,14 @@ const ProposalViewer: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Total Cost:</span>
-                        <span>${(dateData.totalCost || 0).toFixed(2)}</span>
+                        <span>${formatCurrency(dateData.totalCost || 0)}</span>
                       </div>
                     </div>
                   </div>
                 </div>
               ))}
 
-              <div className="bg-gray-100 rounded-lg p-6">
+              <div className="bg-white rounded-lg shadow-md p-6">
                 <h4 className="font-semibold mb-3">{location} Totals</h4>
                 <div className="grid gap-2">
                   <div className="flex justify-between">
@@ -455,23 +469,23 @@ const ProposalViewer: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Cost:</span>
-                    <span>${Object.values(locationData).reduce((sum: number, day: any) => sum + day.totalCost, 0).toFixed(2)}</span>
+                    <span>${formatCurrency(Object.values(locationData).reduce((sum: number, day: any) => sum + day.totalCost, 0))}</span>
                   </div>
                 </div>
               </div>
             </div>
           ))}
 
-          <div className="bg-[#175071] text-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-semibold mb-6">Event Summary</h2>
-            <div className="grid gap-4">
+          <div className="bg-shortcut-blue text-white rounded-lg shadow-md p-8">
+            <h2 className="text-2xl font-semibold mb-6 text-white">Event Summary</h2>
+            <div className="grid gap-4 text-white">
               <div className="flex justify-between items-center py-2 border-b border-white/20">
                 <span>Total Appointments:</span>
                 <span className="font-semibold">{displayData.summary?.totalAppointments}</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span>Total Cost:</span>
-                <span className="font-semibold">${(displayData.summary?.totalEventCost || 0).toFixed(2)}</span>
+                <span>Total Event Cost:</span>
+                <span className="font-semibold">${formatCurrency(displayData.summary?.totalEventCost || 0)}</span>
               </div>
             </div>
           </div>
@@ -499,13 +513,6 @@ const ProposalViewer: React.FC = () => {
           </div>
         </div>
       </main>
-
-      {showShareModal && (
-        <ShareProposalModal
-          proposalId={id!}
-          onClose={() => setShowShareModal(false)}
-        />
-      )}
     </div>
   );
 };

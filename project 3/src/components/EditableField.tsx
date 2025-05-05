@@ -41,6 +41,13 @@ const EditableField: React.FC<EditableFieldProps> = ({
     onChange(type === 'number' ? Number(fieldValue) : fieldValue);
   };
 
+  const formatValue = (val: string | number): string => {
+    if (type === 'number' && typeof val === 'number') {
+      return val.toFixed(2);
+    }
+    return String(val);
+  };
+
   const renderChangeIndicator = () => {
     if (!showChange || originalValue === undefined || originalValue === value) return null;
 
@@ -62,9 +69,9 @@ const EditableField: React.FC<EditableFieldProps> = ({
   
   if (!isEditing) {
     return (
-      <div className={`flex items-center ${className}`}>
-        <span>
-          {prefix}{value}{suffix}
+      <div className={`flex items-center justify-end ${className}`}>
+        <span className="whitespace-nowrap">
+          {prefix}{formatValue(value)}
         </span>
         {renderChangeIndicator()}
       </div>
@@ -77,25 +84,24 @@ const EditableField: React.FC<EditableFieldProps> = ({
         value={fieldValue}
         onChange={handleChange}
         onBlur={handleBlur}
-        className={`px-2 py-1 border border-[#175071] rounded-md focus:outline-none focus:ring-2 focus:ring-[#175071] focus:ring-opacity-50 ${className}`}
+        className={`w-full min-h-[100px] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#175071] focus:border-transparent ${className}`}
         rows={3}
       />
     );
   }
   
   return (
-    <div className="inline-flex items-center">
+    <div className="flex items-center justify-end">
       {prefix && <span className="mr-1">{prefix}</span>}
       <input
         type={type}
         value={fieldValue}
         onChange={handleChange}
         onBlur={handleBlur}
-        className={`px-2 py-1 border border-[#175071] rounded-md focus:outline-none focus:ring-2 focus:ring-[#175071] focus:ring-opacity-50 ${type === 'number' ? 'w-24' : ''} ${className}`}
+        className={`w-32 px-4 py-2 text-right border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#175071] focus:border-transparent ${className}`}
         min={type === 'number' ? 0 : undefined}
         step={type === 'number' ? 'any' : undefined}
       />
-      {suffix && <span className="ml-1">{suffix}</span>}
       {renderChangeIndicator()}
     </div>
   );

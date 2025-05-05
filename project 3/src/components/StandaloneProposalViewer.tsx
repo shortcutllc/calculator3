@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Edit, Save, History as HistoryIcon, CheckCircle2 } from 'lucide-react';
+import { Edit, Save, Eye, Share2, ArrowLeft, Check, X, History as HistoryIcon, Globe, Copy, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { LoadingSpinner } from './LoadingSpinner';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -8,6 +8,11 @@ import { config } from '../config';
 import { recalculateServiceTotals } from '../utils/proposalGenerator';
 import EditableField from './EditableField';
 import { format } from 'date-fns';
+import { Button } from './Button';
+
+const formatCurrency = (value: number): string => {
+  return value.toFixed(2);
+};
 
 const StandaloneProposalViewer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,7 +39,7 @@ const StandaloneProposalViewer: React.FC = () => {
       if (!dateString) return 'No Date';
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return 'Invalid Date';
-      return format(date, 'yyyy-MM-dd');
+      return format(date, 'MMMM d, yyyy');
     } catch (err) {
       console.error('Error formatting date:', err);
       return 'Invalid Date';
@@ -235,7 +240,7 @@ const StandaloneProposalViewer: React.FC = () => {
               ) : (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 bg-[#175071] text-white rounded-md hover:bg-[#134660] flex items-center gap-2"
+                  className="px-4 py-2 bg-[#175071] text-white rounded-m hover:bg-[#134660] flex items-center gap-2"
                 >
                   <Edit size={18} />
                   Edit
@@ -278,7 +283,7 @@ const StandaloneProposalViewer: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Total Cost</p>
-                    <p className="text-lg">${(displayData.summary?.totalEventCost || 0).toFixed(2)}</p>
+                    <p className="text-lg">${formatCurrency(displayData.summary?.totalEventCost || 0)}</p>
                   </div>
                 </div>
               </div>
@@ -295,11 +300,15 @@ const StandaloneProposalViewer: React.FC = () => {
           )}
 
           {Object.entries(displayData.services || {}).map(([location, locationData]: [string, any]) => (
-            <div key={location} className="bg-white rounded-lg shadow-md p-8 mb-8">
-              <h2 className="text-2xl font-semibold mb-6">{location}</h2>
+            <div key={location} className="mb-8">
+              <h2 className="text-2xl font-semibold mb-6 bg-white rounded-lg shadow-md p-6">
+                {location}
+              </h2>
               
-              {Object.entries(locationData).map(([date, dateData]: [string, any], dateIndex: number) => (
-                <div key={date} className="mb-8">
+              {Object.entries(locationData)
+                .sort(([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime())
+                .map(([date, dateData]: [string, any], dateIndex: number) => (
+                <div key={date} className="bg-white rounded-lg shadow-md p-6 mb-6">
                   <h3 className="text-xl font-semibold mb-4">
                     Day {dateIndex + 1} - {formatDate(date)}
                   </h3>
@@ -363,7 +372,7 @@ const StandaloneProposalViewer: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Total Cost:</span>
-                        <span>${(dateData.totalCost || 0).toFixed(2)}</span>
+                        <span>${formatCurrency(dateData.totalCost || 0)}</span>
                       </div>
                     </div>
                   </div>
@@ -379,23 +388,35 @@ const StandaloneProposalViewer: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Cost:</span>
-                    <span>${Object.values(locationData).reduce((sum: number, day: any) => sum + day.totalCost, 0).toFixed(2)}</span>
+                    <span>${formatCurrency(Object.values(locationData).reduce((sum: number, day: any) => sum + day.totalCost, 0))}</span>
                   </div>
                 </div>
               </div>
             </div>
           ))}
 
-          <div className="bg-[#175071] text-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-semibold mb-6">Event Summary</h2>
-            <div className="grid gap-4">
+          <div className="bg-shortcut-blue text-white rounded-lg shadow-md p-8">
+            <h2 className="text-2xl font-semibold mb-6 text-white">Event Summary</h2>
+            <div className="grid gap-4 text-white">
               <div className="flex justify-between items-center py-2 border-b border-white/20">
                 <span>Total Appointments:</span>
                 <span className="font-semibold">{displayData.summary?.totalAppointments}</span>
               </div>
+              <div className="flex justify-between items-center py-2 border-b border-white/20">
+                <span>Total Event Cost:</span>
+                <span className="font-semibold">${formatCurrency(displayData.summary?.totalEventCost || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-white/20">
+                <span>Professional Revenue:</span>
+                <span className="font-semibold">${formatCurrency(displayData.summary?.totalProRevenue || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-white/20">
+                <span>Net Profit:</span>
+                <span className="font-semibold">${formatCurrency(displayData.summary?.netProfit || 0)}</span>
+              </div>
               <div className="flex justify-between items-center py-2">
-                <span>Total Cost:</span>
-                <span className="font-semibold">${(displayData.summary?.totalEventCost || 0).toFixed(2)}</span>
+                <span>Profit Margin:</span>
+                <span className="font-semibold">{(displayData.summary?.profitMargin || 0).toFixed(1)}%</span>
               </div>
             </div>
           </div>

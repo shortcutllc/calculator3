@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { AlertCircle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Button } from './Button';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -37,7 +38,7 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-[#175071] mb-6">Sign In</h2>
+        <h2 className="text-2xl font-bold text-shortcut-blue mb-6">Sign In</h2>
         
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-md mb-6 flex items-start gap-3">
@@ -81,24 +82,25 @@ const Login: React.FC = () => {
             />
           </div>
           
-          <button
+          <Button
             type="submit"
-            disabled={loading}
-            className="w-full bg-[#175071] text-white py-2 px-4 rounded-md hover:bg-[#134660] disabled:opacity-50 transition-colors"
+            variant="primary"
+            loading={loading}
+            className="w-full"
           >
             {loading ? 'Signing in...' : 'Sign In'}
-          </button>
+          </Button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}
-            <button
+            <Button
               onClick={() => navigate('/register')}
-              className="text-[#175071] hover:underline font-medium"
+              variant="secondary"
             >
               Create Account
-            </button>
+            </Button>
           </p>
         </div>
       </div>

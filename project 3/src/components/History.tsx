@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
-import { FileText, Trash2, Eye, Search, Calendar, DollarSign, Share2, CheckCircle2, XCircle as XCircle2, Clock, Lock, Copy, ArrowRight, History as HistoryIcon } from 'lucide-react';
+import { FileText, Trash2, Eye, Search, Calendar, DollarSign, Share2, CheckCircle2, XCircle as XCircle2, Clock, Lock, Copy, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProposal } from '../contexts/ProposalContext';
+import { Button } from './Button';
 import { getProposalUrl } from '../utils/url';
 
 interface FilterOptions {
@@ -170,19 +171,19 @@ const History: React.FC = () => {
   const filteredProposals = filterProposals();
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-[#175071]">Calculation History</h2>
-          <button
+    <div className="max-w-7xl mx-auto p-4">
+      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-8 mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h2 className="text-2xl font-semibold text-shortcut-blue">Calculation History</h2>
+          <Button
             onClick={() => navigate('/')}
-            className="px-4 py-2 bg-[#FFEB69] text-[#175071] rounded-md font-medium"
+            variant="primary"
           >
             New Calculation
-          </button>
+          </Button>
         </div>
 
-        <div className="bg-gray-50 rounded-xl p-6 mb-8">
+        <div className="bg-gray-50 rounded-xl p-4 sm:p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -314,11 +315,8 @@ const History: React.FC = () => {
               const shareableLink = getShareableLink(proposal.id);
 
               return (
-                <div
-                  key={proposal.id}
-                  className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start">
+                <div key={proposal.id} className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow">
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                     <div className="space-y-1">
                       <h3 className="text-xl font-semibold text-[#175071]">
                         {proposal.data.clientName}
@@ -326,52 +324,37 @@ const History: React.FC = () => {
                       <p className="text-sm text-gray-500">
                         Created {format(parseISO(proposal.createdAt), 'MMM d, yyyy h:mm a')}
                       </p>
-                      <div className="flex gap-2 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-2">
                         {getStatusBadge(proposal.status, proposal.hasChanges, proposal.pendingReview)}
-                        {proposal.isPasswordProtected && (
-                          <span className="flex items-center gap-1 text-amber-600 bg-amber-50 px-2 py-1 rounded-full text-sm">
-                            <Lock size={14} />
-                            Password Protected
-                          </span>
-                        )}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
+                    <div className="flex flex-wrap gap-2">
+                      <Button
                         onClick={() => navigate(`/proposal/${proposal.id}`)}
-                        className="p-2 text-[#175071] hover:bg-[#175071] hover:text-white rounded-md transition-colors"
-                        title="View Current"
+                        variant="primary"
+                        icon={<Eye size={20} />}
                       >
-                        <Eye size={20} />
-                      </button>
-                      {proposal.originalData && (
-                        <button
-                          onClick={() => navigate(`/proposal/${proposal.id}?original=true`)}
-                          className="p-2 text-[#175071] hover:bg-[#175071] hover:text-white rounded-md transition-colors"
-                          title="View Original"
-                        >
-                          <HistoryIcon size={20} />
-                        </button>
-                      )}
-                      <button
+                        View
+                      </Button>
+                      <Button
                         onClick={() => copyToClipboard(shareableLink, proposal.id)}
-                        className="p-2 text-[#175071] hover:bg-[#175071] hover:text-white rounded-md transition-colors"
-                        title={copiedId === proposal.id ? 'Copied!' : 'Copy Share Link'}
+                        variant="secondary"
+                        icon={copiedId === proposal.id ? <CheckCircle2 size={20} /> : <Share2 size={20} />}
                       >
-                        <Share2 size={20} />
-                      </button>
-                      <button
+                        {copiedId === proposal.id ? 'Copied!' : 'Share'}
+                      </Button>
+                      <Button
                         onClick={() => handleDelete(proposal.id)}
+                        variant="secondary"
+                        icon={<Trash2 size={20} />}
                         disabled={isDeleting === proposal.id}
-                        className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-md transition-colors disabled:opacity-50"
-                        title="Delete Proposal"
                       >
-                        <Trash2 size={20} />
-                      </button>
+                        Delete
+                      </Button>
                     </div>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-5 w-5 text-gray-400" />
                       <span className="text-sm text-gray-600">
@@ -392,26 +375,12 @@ const History: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="mt-4 space-y-2">
+                  <div className="mt-4">
                     <p className="text-sm text-gray-600">
                       Locations: {locations.join(', ')}
                     </p>
-                    {proposal.isPasswordProtected && (
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-gray-600">
-                          Password: <span className="font-mono">{proposal.password}</span>
-                        </p>
-                        <button
-                          onClick={() => copyToClipboard(proposal.password!, `${proposal.id}-pwd`)}
-                          className="p-1 text-gray-500 hover:text-gray-700"
-                          title={copiedId === `${proposal.id}-pwd` ? 'Copied!' : 'Copy Password'}
-                        >
-                          <Copy size={14} />
-                        </button>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm text-gray-600">
+                    <div className="flex items-center gap-2 mt-2">
+                      <p className="text-sm text-gray-600 truncate">
                         Share Link: <span className="font-mono text-xs">{shareableLink}</span>
                       </p>
                       <button
@@ -419,7 +388,7 @@ const History: React.FC = () => {
                         className="p-1 text-gray-500 hover:text-gray-700"
                         title={copiedId === `${proposal.id}-link` ? 'Copied!' : 'Copy Link'}
                       >
-                        <Copy size={14} />
+                        {copiedId === `${proposal.id}-link` ? <CheckCircle2 size={14} /> : <Copy size={14} />}
                       </button>
                     </div>
                   </div>

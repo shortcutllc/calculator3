@@ -3,6 +3,7 @@ import { FileText, Share2, Plus, Trash, X, Calculator } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProposal } from '../contexts/ProposalContext';
 import ProposalOptionsModal from './ProposalOptionsModal';
+import { Button } from './Button';
 
 interface Service {
   serviceType: string;
@@ -395,68 +396,70 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {!showDashboard ? (
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-3xl font-bold mb-8 text-gray-800">Create New Calculation</h1>
-          <form onSubmit={handleStartCalculation}>
-            <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Client Name
-              </label>
-              <input
-                type="text"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter client name"
-              />
-            </div>
-            
-            <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Locations
-              </label>
-              {locations.map((location, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => updateLocation(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter location"
-                  />
-                  {locations.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeLocation(index)}
-                      className="p-2 text-red-600 hover:text-red-800"
-                    >
-                      <X size={20} />
-                    </button>
-                  )}
-                </div>
-              ))}
+        <div className="max-w-2xl mx-auto p-4 sm:p-8">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-8">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-shortcut-blue">Create New Calculation</h1>
+            <form onSubmit={handleStartCalculation}>
+              <div className="mb-6">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Client Name
+                </label>
+                <input
+                  type="text"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter client name"
+                />
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Locations
+                </label>
+                {locations.map((location, index) => (
+                  <div key={index} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={location}
+                      onChange={(e) => updateLocation(index, e.target.value)}
+                      className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter location"
+                    />
+                    {locations.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeLocation(index)}
+                        className="p-2 text-red-600 hover:text-red-800"
+                      >
+                        <X size={20} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addLocation}
+                  className="flex items-center text-blue-600 hover:text-blue-800 mt-2"
+                >
+                  <Plus size={20} className="mr-1" />
+                  Add Location
+                </button>
+              </div>
+              
               <button
-                type="button"
-                onClick={addLocation}
-                className="flex items-center text-blue-600 hover:text-blue-800"
+                type="submit"
+                className="w-full px-6 py-3 bg-[#FF5050] text-white font-bold rounded-full hover:bg-[#E84848] transition-colors"
               >
-                <Plus size={20} className="mr-1" />
-                Add Location
+                Start Calculation
               </button>
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Start Calculation
-            </button>
-          </form>
+            </form>
+          </div>
         </div>
       ) : showResults ? (
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Event Details</h2>
+        <div className="max-w-4xl mx-auto p-4">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-8 mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-800">Event Details</h2>
             <div className="grid gap-4">
               <div className="flex justify-between items-center py-2 border-b">
                 <span className="text-gray-600">Client Name:</span>
@@ -474,15 +477,15 @@ const Home: React.FC = () => {
           </div>
 
           {Object.entries(calculationResults?.locationBreakdown || {}).map(([location, locationData]) => (
-            <div key={location} className="bg-white rounded-lg shadow-md p-8 mb-8">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800">{location}</h2>
+            <div key={location} className="bg-white rounded-lg shadow-md p-4 sm:p-8 mb-8">
+              <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-800">{location}</h2>
               
               {Object.entries(locationData.dateBreakdown).map(([date, dateData], dateIndex) => (
                 <div key={date} className="mb-8">
-                  <h3 className="text-xl font-semibold mb-4">Day {dateIndex + 1} - {date}</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold mb-4">Day {dateIndex + 1} - {date}</h3>
                   
                   {dateData.services.map((service, serviceIndex) => (
-                    <div key={serviceIndex} className="bg-gray-50 rounded-lg p-6 mb-4">
+                    <div key={serviceIndex} className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-4">
                       <h4 className="font-semibold mb-3">Service {serviceIndex + 1}: {service.serviceType}</h4>
                       <div className="grid gap-2">
                         <div className="flex justify-between">
@@ -505,7 +508,7 @@ const Home: React.FC = () => {
                     </div>
                   ))}
 
-                  <div className="bg-blue-50 rounded-lg p-6">
+                  <div className="bg-blue-50 rounded-lg p-4 sm:p-6">
                     <h4 className="font-semibold mb-3">Day {dateIndex + 1} Totals</h4>
                     <div className="grid gap-2">
                       <div className="flex justify-between">
@@ -521,7 +524,7 @@ const Home: React.FC = () => {
                 </div>
               ))}
 
-              <div className="bg-gray-100 rounded-lg p-6">
+              <div className="bg-gray-100 rounded-lg p-4 sm:p-6">
                 <h4 className="font-semibold mb-3">{location} Totals</h4>
                 <div className="grid gap-2">
                   <div className="flex justify-between">
@@ -537,9 +540,9 @@ const Home: React.FC = () => {
             </div>
           ))}
 
-          <div className="bg-[#175071] text-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-bold mb-6">Event Summary</h2>
-            <div className="grid gap-4">
+          <div className="bg-shortcut-blue text-white rounded-lg shadow-md p-4 sm:p-8">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-6 text-white">Event Summary</h2>
+            <div className="grid gap-4 text-white">
               <div className="flex justify-between items-center py-2 border-b border-white/20">
                 <span>Total Appointments:</span>
                 <span className="font-semibold">{calculationResults?.totalAppointments}</span>
@@ -564,49 +567,50 @@ const Home: React.FC = () => {
           </div>
 
           <div className="flex justify-center mt-8 gap-4">
-            <button
+            <Button
               onClick={() => setShowResults(false)}
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+              variant="secondary"
             >
               Back to Calculator
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setShowProposalModal(true)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              variant="primary"
             >
               Generate Proposal
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800">
+        <div className="max-w-4xl mx-auto p-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-shortcut-blue">
               {clientData.name}'s Calculation
             </h1>
-            <button
+            <Button
               onClick={calculateResults}
-              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              variant="primary"
+              icon={<Calculator size={20} />}
             >
-              <Calculator className="mr-2" size={20} />
               Calculate
-            </button>
+            </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {clientData.locations.map((location) => (
               <div
                 key={location}
                 className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
               >
-                <h3 className="text-xl font-semibold mb-4 text-gray-800">{location}</h3>
-                <button
+                <h3 className="text-xl font-semibold mb-4 text-shortcut-blue">{location}</h3>
+                <Button
                   onClick={() => showEventModalForLocation(location)}
-                  className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  variant="primary"
+                  icon={<Plus size={20} />}
+                  className="w-full"
                 >
-                  <Plus size={20} className="mr-2" />
                   Add Event
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -788,8 +792,7 @@ const Home: React.FC = () => {
                       </div>
                     )}
 
-                    {service.serviceType ===
-                      'headshot' && (
+                    {service.serviceType === 'headshot' && (
                       <div>
                         <label className="block text-gray-700 text-sm font-bold mb-2">
                           Retouching Cost
